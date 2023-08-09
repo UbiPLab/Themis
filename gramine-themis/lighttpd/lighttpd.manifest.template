@@ -1,0 +1,35 @@
+# lighttpd manifest example
+
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "{{ install_dir }}/sbin/lighttpd"
+
+loader.log_level = "{{ log_level }}"
+
+loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}:{{ install_dir }}/lib"
+
+loader.argv = ["lighttpd", "-D", "-m", "{{ install_dir }}/lib", "-f", "lighttpd.conf"]
+
+sys.enable_sigterm_injection = true
+
+fs.mounts = [
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+  { path = "{{ install_dir }}", uri = "file:{{ install_dir }}" },
+
+  { type = "tmpfs", path = "/var/tmp" },
+]
+
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+sgx.enclave_size = "256M"
+sgx.max_threads = 3
+
+sgx.trusted_files = [
+  "file:{{ gramine.libos }}",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:{{ install_dir }}/",
+  "file:{{ arch_libdir }}/",
+  "file:lighttpd.conf",
+  "file:lighttpd-generic.conf",
+  "file:lighttpd-server.conf",
+]

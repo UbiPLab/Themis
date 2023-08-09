@@ -1,0 +1,37 @@
+# Secret Provisioning manifest file example (client)
+
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "/client"
+
+loader.log_level = "{{ log_level }}"
+
+loader.env.LD_LIBRARY_PATH = "/lib:{{ arch_libdir }}:/usr{{ arch_libdir }}"
+
+fs.mounts = [
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+  { path = "/usr{{ arch_libdir }}", uri = "file:/usr{{ arch_libdir }}" },
+  { path = "/client", uri = "file:client" },
+  { path = "/ca.crt", uri = "file:../ssl/ca.crt" },
+  { path = "/etc/hosts", uri = "file:../helper-files/hosts" },
+]
+
+sys.enable_extra_runtime_domain_names_conf = true
+
+sgx.enclave_size = "512M"
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+
+sgx.remote_attestation = "{{ ra_type }}"
+sgx.ra_client_spid = "{{ ra_client_spid }}"
+sgx.ra_client_linkable = {{ 'true' if ra_client_linkable == '1' else 'false' }}
+
+sgx.trusted_files = [
+  "file:{{ gramine.libos }}",
+  "file:client",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:{{ arch_libdir }}/",
+  "file:/usr{{ arch_libdir }}/",
+  "file:../ssl/ca.crt",
+  "file:../helper-files/",
+]

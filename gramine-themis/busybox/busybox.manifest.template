@@ -1,0 +1,34 @@
+# Busybox manifest file example
+
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "/busybox"
+
+loader.log_level = "{{ log_level }}"
+
+loader.env.LD_LIBRARY_PATH = "/lib"
+
+loader.insecure__use_cmdline_argv = true
+
+fs.mounts = [
+  { path = "/busybox", uri = "file:busybox" },
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+
+  # hardcoded mappings of local hostnames to IP addresses, required by e.g. `hostname` applet
+  { path = "/etc/hosts", uri = "file:helper-files/hosts" },
+]
+
+# required by e.g. `wget` applet
+sys.enable_extra_runtime_domain_names_conf = true
+
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+
+sgx.remote_attestation = "{{ ra_type }}"
+sgx.ra_client_spid = "{{ ra_client_spid }}"
+sgx.ra_client_linkable = {{ 'true' if ra_client_linkable == '1' else 'false' }}
+
+sgx.trusted_files = [
+  "file:busybox",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:{{ gramine.libos }}",
+]

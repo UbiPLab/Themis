@@ -1,0 +1,20 @@
+
+loader.entrypoint = "file:{{ gramine.libos }}"
+libos.entrypoint = "/watermark"
+loader.log_level = "{{ log_level }}"
+
+loader.env.LD_LIBRARY_PATH = "/lib"
+
+fs.mounts = [
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "/watermark", uri = "file:watermark" },
+]
+
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+
+sgx.trusted_files = [
+  "file:{{ gramine.libos }}",
+  "file:watermark",
+  "file:{{ gramine.runtimedir() }}/",
+]
